@@ -1,23 +1,26 @@
 function debounce(callback, delay, immediate = false) {
   let timeoutId = null;
-  let lastCallTime = null;
+  let isCooldown = false;
 
   return function debouncedFunction(...args) {
     const context = this;
 
-    const callNow = immediate && !timeoutId;
-
-    clearTimeout(timeoutId);
-
-    timeoutId = setTimeout(() => {
+    const later = () => {
       timeoutId = null;
       if (!immediate) {
         callback.apply(context, args);
       }
-    }, delay);
+      isCooldown = false; // allow future immediate calls after delay
+    };
+
+    const callNow = immediate && !isCooldown;
+
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(later, delay);
 
     if (callNow) {
       callback.apply(context, args);
+      isCooldown = true;
     }
   };
 }
